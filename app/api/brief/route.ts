@@ -14,9 +14,10 @@ export async function POST(req: NextRequest) {
       customApiKey,
     }: { analysis: BriefingAnalysis; persona: PersonaType; customApiKey?: string } = body;
 
-    if (!analysis || !persona) {
+    const allowedPersonas: PersonaType[] = ['principal', 'rwa', 'municipal', 'gig_dispatch'];
+    if (!analysis || !persona || !allowedPersonas.includes(persona)) {
       return NextResponse.json(
-        { error: 'Invalid input: both analysis data and persona type are required.' },
+        { error: 'Invalid input: valid persona type (principal, rwa, municipal, gig_dispatch) and analysis data are required.' },
         { status: 400 }
       );
     }

@@ -47,7 +47,10 @@ export async function POST(req: NextRequest) {
       fr: 'French (Français)',
     };
 
-    const targetLangName = languageNames[language] || language;
+    const allowedReadingLevels = ['General Public', 'Simple (5th Grade)', 'Technical'];
+    const sanitizedReadingLevel = allowedReadingLevels.includes(readingLevel) ? readingLevel : 'General Public';
+    const sanitizedLanguage = String(language).replace(/[^a-zA-Z-]/g, '').slice(0, 10) || 'en';
+    const targetLangName = languageNames[sanitizedLanguage] || sanitizedLanguage;
 
     const systemInstruction = `You are an elite Public Health Communication Director and Multilingual Citizen Health Advocate.
 Your mission is to translate complex atmospheric pollution data into an empathetic, clear, life-saving Citizen Advisory Card.
