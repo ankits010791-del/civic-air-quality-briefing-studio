@@ -107,9 +107,20 @@ export default function CivicBriefingStudio() {
         }),
       });
 
-      const data = await res.json();
+      let data: any;
+      try {
+        data = await res.json();
+      } catch (parseErr) {
+        const text = await res.text().catch(() => '');
+        throw new Error(
+          text && text.length < 200
+            ? text
+            : 'Gemini service is experiencing high load or returned a non-JSON response. Please retry in a moment.'
+        );
+      }
+
       if (!res.ok) {
-        throw new Error(data.error || 'Failed to normalize atmospheric feed.');
+        throw new Error(data?.error || 'Failed to normalize atmospheric feed.');
       }
 
       setAnalysis(data.analysis);
@@ -143,9 +154,14 @@ export default function CivicBriefingStudio() {
         }),
       });
 
-      const data = await res.json();
+      let data: any;
+      try {
+        data = await res.json();
+      } catch {
+        throw new Error('Gemini service is experiencing high load. Please retry in a moment.');
+      }
       if (!res.ok) {
-        throw new Error(data.error || 'Failed to generate persona actions.');
+        throw new Error(data?.error || 'Failed to generate persona actions.');
       }
 
       setActionCards(data.actions || []);
@@ -184,9 +200,14 @@ export default function CivicBriefingStudio() {
         }),
       });
 
-      const data = await res.json();
+      let data: any;
+      try {
+        data = await res.json();
+      } catch {
+        throw new Error('Gemini service is experiencing high load. Please retry in a moment.');
+      }
       if (!res.ok) {
-        throw new Error(data.error || 'Failed to run longitudinal comparison.');
+        throw new Error(data?.error || 'Failed to run longitudinal comparison.');
       }
 
       setComparisonResult(data.comparison);
@@ -235,9 +256,14 @@ export default function CivicBriefingStudio() {
         }),
       });
 
-      const data = await res.json();
+      let data: any;
+      try {
+        data = await res.json();
+      } catch {
+        throw new Error('Gemini service is experiencing high load. Please retry in a moment.');
+      }
       if (!res.ok) {
-        throw new Error(data.error || 'Failed to generate citizen advisory.');
+        throw new Error(data?.error || 'Failed to generate citizen advisory.');
       }
 
       setCitizenAdvisory(data.advisory);

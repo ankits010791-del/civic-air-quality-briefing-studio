@@ -114,20 +114,39 @@ export async function callGemini(
       return text;
     }
 
-    // If gemini-2.5-flash encounters an unexpected model availability error in older projects, attempt fallback to gemini-1.5-flash
+    // Fallback if model encounters 503 high demand / 429 rate limit or not found
     if (
-      modelName === 'gemini-2.5-flash' &&
-      (error?.message?.includes('not found') || error?.message?.includes('404') || error?.status === 404)
+      (modelName === 'gemini-2.5-flash' || modelName.includes('2.5')) &&
+      (error?.message?.includes('503') ||
+        error?.message?.includes('high demand') ||
+        error?.message?.includes('429') ||
+        error?.message?.includes('RESOURCE_EXHAUSTED') ||
+        error?.message?.includes('not found') ||
+        error?.message?.includes('404') ||
+        error?.status === 404 ||
+        error?.status === 503)
     ) {
-      console.warn('gemini-2.5-flash not found on current API tier, falling back to gemini-1.5-flash');
-      const fallbackResponse = await ai.models.generateContent({
-        model: 'gemini-1.5-flash',
-        contents: prompt,
-        config: options?.systemInstruction ? { systemInstruction: options.systemInstruction } : undefined,
-      });
-      const text = fallbackResponse.text;
-      if (!text) throw new Error('Received empty response from fallback model.');
-      return text;
+      console.warn(`[Gemini Fallback] ${modelName} encountered: ${error.message}. Falling back to gemini-1.5-flash...`);
+      try {
+        const fallbackResponse = await ai.models.generateContent({
+          model: 'gemini-1.5-flash',
+          contents: prompt,
+          config: options?.systemInstruction ? { systemInstruction: options.systemInstruction } : undefined,
+        });
+        const text = fallbackResponse.text;
+        if (!text) throw new Error('Received empty response from fallback model.');
+        return text;
+      } catch (fallbackErr: any) {
+        console.warn(`[Gemini Fallback 2] gemini-1.5-flash failed, trying gemini-2.0-flash...`);
+        const fallback2Response = await ai.models.generateContent({
+          model: 'gemini-2.0-flash',
+          contents: prompt,
+          config: options?.systemInstruction ? { systemInstruction: options.systemInstruction } : undefined,
+        });
+        const text2 = fallback2Response.text;
+        if (!text2) throw new Error('Received empty response from fallback model 2.');
+        return text2;
+      }
     }
 
     throw error;
