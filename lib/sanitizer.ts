@@ -16,6 +16,21 @@ const INJECTION_PATTERNS = [
   /javascript\s*:/gi,
   /\bexec\s*\(/gi,
   /\{\{\s*constructor\s*\.[\s\S]*?\}\}/gi,
+  // Advanced Prompt Injection and Jailbreak defense patterns
+  /\b(?:act\s+as|pretend\s+to\s+be|simulate)\s+(?:a|an)\b/gi,
+  /\bjailbreak\b/gi,
+  /\bDAN\s+mode\b/gi,
+  /\bdeveloper\s+mode\b/gi,
+  /\bforget\s+(?:all\s+)?instructions\b/gi,
+  /\bdo\s+not\s+follow\s+(?:the\s+)?system\b/gi,
+  /\boverride\s+(?:system|safety)\s+rules\b/gi,
+  /\bbypass\s+restrictions\b/gi,
+  /<iframe[\s\S]*?>[\s\S]*?<\/iframe>/gi,
+  /<object[\s\S]*?>[\s\S]*?<\/object>/gi,
+  /<embed[\s\S]*?>[\s\S]*?<\/embed>/gi,
+  /onerror\s*=/gi,
+  /onload\s*=/gi,
+  /eval\s*\(/gi,
 ];
 
 /**
@@ -41,6 +56,13 @@ export function sanitizeRawInput(
   if (hadControlChars) {
     cleaned = cleaned.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '');
     threatsNeutralized.push('Sanitized dangerous non-printable ASCII control characters.');
+  }
+
+  // 1b. Strip HTML tags / event handlers
+  const htmlTagPattern = /<\/?(?:script|iframe|object|embed|style|svg|img|a|form|input|button|link|meta)[\s\S]*?>/gi;
+  if (htmlTagPattern.test(cleaned)) {
+    cleaned = cleaned.replace(htmlTagPattern, '');
+    threatsNeutralized.push('Sanitized dangerous embedded HTML tags and potential XSS vectors.');
   }
 
   // 2. Neutralize Prompt Injection attempts

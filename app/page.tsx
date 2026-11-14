@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import {
   Database,
   Users,
@@ -21,268 +21,44 @@ import { TraceabilityModal } from '@/components/TraceabilityModal';
 import { ComparisonStudio } from '@/components/ComparisonStudio';
 import { InternalBriefingView } from '@/components/InternalBriefingView';
 import { CitizenAdvisoryCard } from '@/components/CitizenAdvisoryCard';
-import {
-  ActionCard,
-  BriefingAnalysis,
-  CitizenAdvisory,
-  ComparisonResult,
-  HistoricalSnapshot,
-  InternalBriefingNote,
-  PersonaType,
-  TraceEvidence,
-} from '@/lib/types';
-import { MESSY_MUNICIPAL_CSV } from '@/lib/sample-data';
+import { useStudioState } from '@/lib/hooks/useStudioState';
 
 export default function CivicBriefingStudio() {
-  // Navigation & Settings State
-  const [activeTab, setActiveTab] = useState<'ingestion' | 'briefs' | 'compare' | 'dual_output'>('ingestion');
-  const [dualOutputSubTab, setDualOutputSubTab] = useState<'internal' | 'citizen'>('internal');
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const [customApiKey, setCustomApiKey] = useState('');
-
-  // Core Data States
-  const [rawData, setRawData] = useState<string>(MESSY_MUNICIPAL_CSV);
-  const [analysis, setAnalysis] = useState<BriefingAnalysis | null>(null);
-  const [selectedPersona, setSelectedPersona] = useState<PersonaType>('principal');
-  const [actionCards, setActionCards] = useState<ActionCard[]>([]);
-  const [internalBriefingNote, setInternalBriefingNote] = useState<InternalBriefingNote | null>(null);
-  const [citizenAdvisory, setCitizenAdvisory] = useState<CitizenAdvisory | null>(null);
-  const [comparisonResult, setComparisonResult] = useState<ComparisonResult | null>(null);
-  const [savedSnapshots, setSavedSnapshots] = useState<HistoricalSnapshot[]>([]);
-
-  // Traceability Modal State
-  const [traceModal, setTraceModal] = useState<{
-    isOpen: boolean;
-    title: string;
-    domain?: string;
-    traceEvidence: TraceEvidence | null;
-  }>({
-    isOpen: false,
-    title: '',
-    traceEvidence: null,
-  });
-
-  // Loading States
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [isGeneratingBrief, setIsGeneratingBrief] = useState(false);
-  const [isComparing, setIsComparing] = useState(false);
-  const [isGeneratingAdvisory, setIsGeneratingAdvisory] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-
-  // Restore custom API key from localStorage if saved
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const savedKey = localStorage.getItem('civic_gemini_api_key');
-      if (savedKey) setCustomApiKey(savedKey);
-    }
-  }, []);
-
-  const handleSaveApiKey = (key: string) => {
-    setCustomApiKey(key);
-    if (typeof window !== 'undefined') {
-      if (key) {
-        localStorage.setItem('civic_gemini_api_key', key);
-      } else {
-        localStorage.removeItem('civic_gemini_api_key');
-      }
-    }
-  };
-
-  // 1. Raw Ingestion & Gemini Normalization
-  const handleAnalyzeData = async () => {
-    if (!rawData.trim()) return;
-    setIsAnalyzing(true);
-    setErrorMessage(null);
-
-    try {
-      const res = await fetch('/api/analyze', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(customApiKey ? { 'x-gemini-api-key': customApiKey } : {}),
-        },
-        body: JSON.stringify({
-          rawData,
-          customApiKey: customApiKey || undefined,
-        }),
-      });
-
-      let data: any;
-      try {
-        data = await res.json();
-      } catch (parseErr) {
-        const text = await res.text().catch(() => '');
-        throw new Error(
-          text && text.length < 200
-            ? text
-            : 'Gemini service is experiencing high load or returned a non-JSON response. Please retry in a moment.'
-        );
-      }
-
-      if (!res.ok) {
-        throw new Error(data?.error || 'Failed to normalize atmospheric feed.');
-      }
-
-      setAnalysis(data.analysis);
-      triggerPersonaBriefGeneration(data.analysis, selectedPersona);
-    } catch (err: any) {
-      setErrorMessage(err.message || 'Error communicating with Gemini.');
-    } finally {
-      setIsAnalyzing(false);
-    }
-  };
-
-  // 2. Role-Based Action Intelligence
-  const triggerPersonaBriefGeneration = async (
-    currentAnalysis: BriefingAnalysis,
-    persona: PersonaType
-  ) => {
-    setIsGeneratingBrief(true);
-    setErrorMessage(null);
-
-    try {
-      const res = await fetch('/api/brief', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(customApiKey ? { 'x-gemini-api-key': customApiKey } : {}),
-        },
-        body: JSON.stringify({
-          analysis: currentAnalysis,
-          persona,
-          customApiKey: customApiKey || undefined,
-        }),
-      });
-
-      let data: any;
-      try {
-        data = await res.json();
-      } catch {
-        throw new Error('Gemini service is experiencing high load. Please retry in a moment.');
-      }
-      if (!res.ok) {
-        throw new Error(data?.error || 'Failed to generate persona actions.');
-      }
-
-      setActionCards(data.actions || []);
-      if (data.internalBriefingNote) {
-        setInternalBriefingNote(data.internalBriefingNote);
-      }
-    } catch (err: any) {
-      setErrorMessage(err.message || 'Error generating role-based action intelligence.');
-    } finally {
-      setIsGeneratingBrief(false);
-    }
-  };
-
-  const handleGenerateBriefForPersona = () => {
-    if (!analysis) return;
-    triggerPersonaBriefGeneration(analysis, selectedPersona);
-  };
-
-  // 3. Longitudinal Delta Comparison
-  const handleRunComparison = async (historical: HistoricalSnapshot) => {
-    if (!analysis) return;
-    setIsComparing(true);
-    setErrorMessage(null);
-
-    try {
-      const res = await fetch('/api/compare', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(customApiKey ? { 'x-gemini-api-key': customApiKey } : {}),
-        },
-        body: JSON.stringify({
-          currentAnalysis: analysis,
-          historicalSnapshot: historical,
-          customApiKey: customApiKey || undefined,
-        }),
-      });
-
-      let data: any;
-      try {
-        data = await res.json();
-      } catch {
-        throw new Error('Gemini service is experiencing high load. Please retry in a moment.');
-      }
-      if (!res.ok) {
-        throw new Error(data?.error || 'Failed to run longitudinal comparison.');
-      }
-
-      setComparisonResult(data.comparison);
-    } catch (err: any) {
-      setErrorMessage(err.message || 'Error comparing snapshots.');
-    } finally {
-      setIsComparing(false);
-    }
-  };
-
-  const handleSaveCurrentAsSnapshot = (name: string) => {
-    if (!analysis) return;
-    const newSnapshot: HistoricalSnapshot = {
-      id: `snap-${Date.now()}`,
-      name,
-      timestamp: new Date().toISOString().replace('T', ' ').slice(0, 19),
-      location: analysis.locationSummary,
-      averageAqi: analysis.averageAqi,
-      peakAqi: analysis.peakAqi,
-      dominantPollutant: analysis.dominantPollutant,
-      totalSensors: analysis.normalizedReadings.length,
-      summary: analysis.executiveSummary,
-      hotspotAreas: analysis.hotspots.map((h) => h.zone),
-    };
-    setSavedSnapshots((prev) => [newSnapshot, ...prev]);
-  };
-
-  // 4. Multilingual Citizen Advisory Generation
-  const handleGenerateAdvisory = async (language: string, readingLevel: string) => {
-    if (!analysis) return;
-    setIsGeneratingAdvisory(true);
-    setErrorMessage(null);
-
-    try {
-      const res = await fetch('/api/advisory', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(customApiKey ? { 'x-gemini-api-key': customApiKey } : {}),
-        },
-        body: JSON.stringify({
-          analysis,
-          language,
-          readingLevel,
-          customApiKey: customApiKey || undefined,
-        }),
-      });
-
-      let data: any;
-      try {
-        data = await res.json();
-      } catch {
-        throw new Error('Gemini service is experiencing high load. Please retry in a moment.');
-      }
-      if (!res.ok) {
-        throw new Error(data?.error || 'Failed to generate citizen advisory.');
-      }
-
-      setCitizenAdvisory(data.advisory);
-    } catch (err: any) {
-      setErrorMessage(err.message || 'Error generating advisory.');
-    } finally {
-      setIsGeneratingAdvisory(false);
-    }
-  };
-
-  // Open Trace Modal
-  const handleOpenTrace = (card: ActionCard) => {
-    setTraceModal({
-      isOpen: true,
-      title: card.actionHeadline,
-      domain: card.targetDomain,
-      traceEvidence: card.traceEvidence,
-    });
-  };
+  const {
+    activeTab,
+    setActiveTab,
+    dualOutputSubTab,
+    setDualOutputSubTab,
+    isSettingsOpen,
+    setIsSettingsOpen,
+    customApiKey,
+    handleSaveApiKey,
+    rawData,
+    setRawData,
+    analysis,
+    selectedPersona,
+    setSelectedPersona,
+    actionCards,
+    internalBriefingNote,
+    citizenAdvisory,
+    comparisonResult,
+    savedSnapshots,
+    traceModal,
+    openTraceModal,
+    closeTraceModal,
+    isAnalyzing,
+    isGeneratingBrief,
+    isComparing,
+    isGeneratingAdvisory,
+    errorMessage,
+    setErrorMessage,
+    handleAnalyzeData,
+    handleGenerateBriefForPersona,
+    triggerPersonaBriefGeneration,
+    handleRunComparison,
+    handleSaveCurrentAsSnapshot,
+    handleGenerateAdvisory,
+  } = useStudioState();
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-cyan-500 selection:text-white">
@@ -499,7 +275,10 @@ export default function CivicBriefingStudio() {
               hasAnalysis={!!analysis}
             />
 
-            <ActionCardsGrid actions={actionCards} onOpenTrace={handleOpenTrace} />
+            <ActionCardsGrid
+              actions={actionCards}
+              onOpenTrace={(card) => openTraceModal(card.actionHeadline, card.traceEvidence, card.targetDomain)}
+            />
           </section>
         )}
 
@@ -569,7 +348,7 @@ export default function CivicBriefingStudio() {
       {/* Global Traceability Modal */}
       <TraceabilityModal
         isOpen={traceModal.isOpen}
-        onClose={() => setTraceModal((prev) => ({ ...prev, isOpen: false }))}
+        onClose={closeTraceModal}
         title={traceModal.title}
         domain={traceModal.domain}
         traceEvidence={traceModal.traceEvidence}
