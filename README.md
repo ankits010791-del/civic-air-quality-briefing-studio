@@ -120,16 +120,9 @@ A production-ready, full-stack environmental decision-support application built 
 
 ## 🌐 Vercel Deployment
 
-This project is built for zero-friction Vercel deployment:
+This project is configured for automated Vercel deployment:
 1. Push the repository to GitHub.
-2. Import the project into [Vercel](https://vercel.com/).
+2. In the [Vercel Dashboard](https://vercel.com/), ensure **Framework Preset** is set to **Next.js** with default output directory.
 3. Add the environment variable:
    - `GEMINI_API_KEY`: Your Google Gemini API Key.
-4. Deploy! Next.js App Router route handlers will automatically run server-side with zero secret leaks.
-
----
-
-## 🛡️ Anti-Disqualification Compliance
-- **Real Model Invocations:** Every action triggers active server-side Route Handlers (`app/api/...`) utilizing `gemini-2.5-flash`.
-- **No Hardcoded Fakes:** In the event of an API key or quota failure, clear error diagnostics are displayed instead of falling back to fake mock data.
-- **Zero Client-Side Secret Leaks:** API keys are processed server-side through Next.js Route Handlers.
+4. Deploy! Server-side route handlers will automatically run on Vercel's Edge/Serverless platform.
