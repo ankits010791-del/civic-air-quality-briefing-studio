@@ -117,7 +117,7 @@ export function SettingsModal({
               />
             </div>
             <p className="mt-1.5 text-xs text-slate-400 flex items-center justify-between">
-              <span>Active Model: <strong className="text-cyan-400">gemini-3.8-flash</strong></span>
+              <span>Active Model: <strong className="text-cyan-400">gemini-2.5-flash-lite</strong></span>
               <a
                 href="https://aistudio.google.com/app/apikey"
                 target="_blank"
