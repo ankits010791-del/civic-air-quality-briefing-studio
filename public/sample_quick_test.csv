@@ -1,0 +1,6 @@
+timestamp,location_sensor,pm25_reading,unit,sensor_status,notes
+2026-11-14 08:00:00,Anand Vihar Ward-12,284.5,ug/m3,CALIBRATED,Heavy morning traffic
+2026-11-14 08:00:00,Rohini Sector 9,0.310,ppm,UNVERIFIED,Unit mismatch detected
+14/11/2026 08:15,Okhla Phase-3,-999,ug/m3,ERROR_CODE,Sensor power glitch
+2026-11-14T08:30:00Z,Lodhi Road Central,45.2,ug/m3,CALIBRATED,Near green belt
+08:45 AM,Connaught Place,168.0,ug/m3,CALIBRATED,Commercial zone peak
