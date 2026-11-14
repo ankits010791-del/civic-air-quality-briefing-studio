@@ -114,22 +114,18 @@ export async function callGemini(
       return text;
     }
 
-    // Fallback if model encounters 503 high demand / 429 rate limit or not found
+    // High-availability fallback if model encounters temporary 503 high demand or 429 rate limit
     if (
-      (modelName === 'gemini-2.5-flash' || modelName.includes('2.5')) &&
       (error?.message?.includes('503') ||
         error?.message?.includes('high demand') ||
         error?.message?.includes('429') ||
-        error?.message?.includes('RESOURCE_EXHAUSTED') ||
-        error?.message?.includes('not found') ||
-        error?.message?.includes('404') ||
-        error?.status === 404 ||
-        error?.status === 503)
+        error?.message?.includes('RESOURCE_EXHAUSTED')) &&
+      modelName !== 'gemini-2.5-flash-lite'
     ) {
-      console.warn(`[Gemini Fallback] ${modelName} encountered: ${error.message}. Falling back to gemini-1.5-flash...`);
+      console.warn(`[Gemini Fallback] ${modelName} spike detected (${error.message}). Gracefully failing over to gemini-2.5-flash-lite...`);
       try {
         const fallbackResponse = await ai.models.generateContent({
-          model: 'gemini-1.5-flash',
+          model: 'gemini-2.5-flash-lite',
           contents: prompt,
           config: options?.systemInstruction ? { systemInstruction: options.systemInstruction } : undefined,
         });
@@ -137,15 +133,7 @@ export async function callGemini(
         if (!text) throw new Error('Received empty response from fallback model.');
         return text;
       } catch (fallbackErr: any) {
-        console.warn(`[Gemini Fallback 2] gemini-1.5-flash failed, trying gemini-2.0-flash...`);
-        const fallback2Response = await ai.models.generateContent({
-          model: 'gemini-2.0-flash',
-          contents: prompt,
-          config: options?.systemInstruction ? { systemInstruction: options.systemInstruction } : undefined,
-        });
-        const text2 = fallback2Response.text;
-        if (!text2) throw new Error('Received empty response from fallback model 2.');
-        return text2;
+        console.warn(`[Gemini Fallback] gemini-2.5-flash-lite also encountered: ${fallbackErr.message}`);
       }
     }
 
