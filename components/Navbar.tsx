@@ -39,7 +39,7 @@ export function Navbar({ onOpenSettings, isAnalyzing, hasData }: NavbarProps) {
           <div className="hidden md:flex items-center space-x-2 rounded-lg bg-slate-900 border border-slate-800 px-3 py-1.5 text-xs text-slate-300">
             <Cpu className="h-3.5 w-3.5 text-cyan-400" aria-hidden="true" />
             <span>Model:</span>
-            <span className="font-semibold text-emerald-400">gemini-2.5-flash-lite</span>
+            <span className="font-semibold text-emerald-400">gemini-3.5-flash-lite</span>
           </div>
 
           <div
