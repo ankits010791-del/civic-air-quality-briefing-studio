@@ -59,7 +59,7 @@ export function extractCleanJson<T = any>(rawText: string): T {
 
 /**
  * Generates content using the official Google Generative AI SDK (@google/genai)
- * with the required gemini-2.5-flash model.
+ * with the required gemini-3.8-flash model (with graceful fallback to gemini-2.5-flash if needed).
  */
 export async function callGemini(
   prompt: string,
@@ -76,7 +76,7 @@ export async function callGemini(
     );
   }
 
-  const modelName = options?.model || 'gemini-2.5-flash';
+  const modelName = options?.model || 'gemini-3.8-flash';
   // Use v1beta so developer instruction (systemInstruction) and latest models are supported
   const ai = new GoogleGenAI({ apiKey, apiVersion: 'v1beta' });
 
@@ -114,18 +114,21 @@ export async function callGemini(
       return text;
     }
 
-    // High-availability fallback if model encounters temporary 503 high demand or 429 rate limit
+    // High-availability fallback if model encounters temporary 503 high demand, 429 rate limit, or model availability change
     if (
       (error?.message?.includes('503') ||
         error?.message?.includes('high demand') ||
         error?.message?.includes('429') ||
+        error?.message?.includes('404') ||
+        error?.message?.includes('not found') ||
+        error?.message?.includes('no longer available') ||
         error?.message?.includes('RESOURCE_EXHAUSTED')) &&
-      modelName !== 'gemini-2.5-flash-lite'
+      modelName !== 'gemini-2.5-flash'
     ) {
-      console.warn(`[Gemini Fallback] ${modelName} spike detected (${error.message}). Gracefully failing over to gemini-2.5-flash-lite...`);
+      console.warn(`[Gemini Fallback] ${modelName} encountered (${error.message}). Gracefully falling back to gemini-2.5-flash...`);
       try {
         const fallbackResponse = await ai.models.generateContent({
-          model: 'gemini-2.5-flash-lite',
+          model: 'gemini-2.5-flash',
           contents: prompt,
           config: options?.systemInstruction ? { systemInstruction: options.systemInstruction } : undefined,
         });
@@ -133,7 +136,7 @@ export async function callGemini(
         if (!text) throw new Error('Received empty response from fallback model.');
         return text;
       } catch (fallbackErr: any) {
-        console.warn(`[Gemini Fallback] gemini-2.5-flash-lite also encountered: ${fallbackErr.message}`);
+        console.warn(`[Gemini Fallback] gemini-2.5-flash also failed: ${fallbackErr.message}`);
       }
     }
 
