@@ -2,18 +2,14 @@
 
 import React, { useState, useEffect } from 'react';
 import {
-  Wind,
   Database,
   Users,
   GitCompare,
   FileSpreadsheet,
   HeartHandshake,
-  ShieldCheck,
   AlertCircle,
-  Sparkles,
   BarChart3,
   Layers,
-  ArrowRight,
 } from 'lucide-react';
 import { Navbar } from '@/components/Navbar';
 import { SettingsModal } from '@/components/SettingsModal';
@@ -35,7 +31,7 @@ import {
   PersonaType,
   TraceEvidence,
 } from '@/lib/types';
-import { MESSY_MUNICIPAL_CSV, HISTORICAL_SNAPSHOTS } from '@/lib/sample-data';
+import { MESSY_MUNICIPAL_CSV } from '@/lib/sample-data';
 
 export default function CivicBriefingStudio() {
   // Navigation & Settings State
@@ -117,7 +113,6 @@ export default function CivicBriefingStudio() {
       }
 
       setAnalysis(data.analysis);
-      // Auto-generate persona brief with default persona
       triggerPersonaBriefGeneration(data.analysis, selectedPersona);
     } catch (err: any) {
       setErrorMessage(err.message || 'Error communicating with Gemini.');
@@ -273,19 +268,23 @@ export default function CivicBriefingStudio() {
       />
 
       {/* Main Studio Container */}
-      <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-6 sm:px-6 space-y-6">
+      <main id="main-content" role="main" className="mx-auto w-full max-w-7xl flex-1 px-4 py-6 sm:px-6 space-y-6">
         {/* Global Error Banner */}
         {errorMessage && (
-          <div className="flex items-start justify-between rounded-2xl bg-rose-950/80 border border-rose-700/80 p-4 text-xs text-rose-200 shadow-lg animate-in fade-in">
+          <div
+            role="alert"
+            className="flex items-start justify-between rounded-2xl bg-rose-950/80 border border-rose-700/80 p-4 text-xs text-rose-200 shadow-lg animate-in fade-in"
+          >
             <div className="flex items-start space-x-3">
-              <AlertCircle className="h-5 w-5 shrink-0 text-rose-400 mt-0.5" />
+              <AlertCircle className="h-5 w-5 shrink-0 text-rose-400 mt-0.5" aria-hidden="true" />
               <div>
                 <p className="font-bold text-rose-100">Operation Notice</p>
                 <p className="mt-0.5 leading-relaxed">{errorMessage}</p>
                 {errorMessage.includes('Missing Gemini API Key') && (
                   <button
                     onClick={() => setIsSettingsOpen(true)}
-                    className="mt-2 inline-flex items-center space-x-1 font-bold text-cyan-300 underline hover:text-cyan-200"
+                    aria-label="Open settings to enter Gemini API key"
+                    className="mt-2 inline-flex items-center space-x-1 font-bold text-cyan-300 underline hover:text-cyan-200 focus:outline-none focus:ring-1 focus:ring-cyan-500 rounded"
                   >
                     <span>Click here to open Settings and set your Gemini API Key</span>
                   </button>
@@ -294,7 +293,8 @@ export default function CivicBriefingStudio() {
             </div>
             <button
               onClick={() => setErrorMessage(null)}
-              className="text-rose-400 hover:text-white ml-2 text-sm font-bold"
+              aria-label="Dismiss error notice"
+              className="text-rose-400 hover:text-white ml-2 text-sm font-bold focus:outline-none focus:ring-1 focus:ring-rose-400 rounded"
             >
               ✕
             </button>
@@ -303,10 +303,16 @@ export default function CivicBriefingStudio() {
 
         {/* Live Ambient Telemetry Banner (If analyzed) */}
         {analysis && (
-          <div className="rounded-2xl border border-cyan-500/20 bg-gradient-to-r from-slate-900 via-slate-900 to-cyan-950/30 p-4 shadow-xl">
+          <section
+            aria-label="Active Telemetry Summary"
+            className="rounded-2xl border border-cyan-500/20 bg-gradient-to-r from-slate-900 via-slate-900 to-cyan-950/30 p-4 shadow-xl"
+          >
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
               <div className="flex items-center space-x-3">
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-cyan-500/10 border border-cyan-500/30 text-cyan-300">
+                <div
+                  className="flex h-12 w-12 items-center justify-center rounded-xl bg-cyan-500/10 border border-cyan-500/30 text-cyan-300"
+                  aria-hidden="true"
+                >
                   <BarChart3 className="h-6 w-6" />
                 </div>
                 <div>
@@ -346,20 +352,24 @@ export default function CivicBriefingStudio() {
                 </div>
               </div>
             </div>
-          </div>
+          </section>
         )}
 
-        {/* Tab Navigation Menu */}
-        <div className="border-b border-slate-800 flex overflow-x-auto no-scrollbar space-x-2">
+        {/* Tab Navigation Menu with full ARIA semantics */}
+        <div role="tablist" aria-label="Studio Functional Modules" className="border-b border-slate-800 flex overflow-x-auto no-scrollbar space-x-2">
           <button
+            role="tab"
+            id="tab-ingestion"
+            aria-selected={activeTab === 'ingestion'}
+            aria-controls="panel-ingestion"
             onClick={() => setActiveTab('ingestion')}
-            className={`flex items-center space-x-2 pb-3 px-3 text-xs sm:text-sm font-semibold transition border-b-2 whitespace-nowrap ${
+            className={`flex items-center space-x-2 pb-3 px-3 text-xs sm:text-sm font-semibold transition border-b-2 whitespace-nowrap focus:outline-none focus:ring-1 focus:ring-cyan-500 ${
               activeTab === 'ingestion'
                 ? 'border-cyan-500 text-cyan-400'
                 : 'border-transparent text-slate-400 hover:text-slate-200'
             }`}
           >
-            <Database className="h-4 w-4" />
+            <Database className="h-4 w-4" aria-hidden="true" />
             <span>1. Ingestion & Data Audit</span>
             {analysis && (
               <span className="rounded-full bg-emerald-950 text-emerald-400 border border-emerald-800 px-1.5 py-0.2 text-[10px]">
@@ -369,14 +379,18 @@ export default function CivicBriefingStudio() {
           </button>
 
           <button
+            role="tab"
+            id="tab-briefs"
+            aria-selected={activeTab === 'briefs'}
+            aria-controls="panel-briefs"
             onClick={() => setActiveTab('briefs')}
-            className={`flex items-center space-x-2 pb-3 px-3 text-xs sm:text-sm font-semibold transition border-b-2 whitespace-nowrap ${
+            className={`flex items-center space-x-2 pb-3 px-3 text-xs sm:text-sm font-semibold transition border-b-2 whitespace-nowrap focus:outline-none focus:ring-1 focus:ring-cyan-500 ${
               activeTab === 'briefs'
                 ? 'border-cyan-500 text-cyan-400'
                 : 'border-transparent text-slate-400 hover:text-slate-200'
             }`}
           >
-            <Users className="h-4 w-4" />
+            <Users className="h-4 w-4" aria-hidden="true" />
             <span>2. Role-Based Action Intelligence</span>
             {actionCards.length > 0 && (
               <span className="rounded-full bg-cyan-950 text-cyan-400 border border-cyan-800 px-1.5 py-0.2 text-[10px]">
@@ -386,14 +400,18 @@ export default function CivicBriefingStudio() {
           </button>
 
           <button
+            role="tab"
+            id="tab-compare"
+            aria-selected={activeTab === 'compare'}
+            aria-controls="panel-compare"
             onClick={() => setActiveTab('compare')}
-            className={`flex items-center space-x-2 pb-3 px-3 text-xs sm:text-sm font-semibold transition border-b-2 whitespace-nowrap ${
+            className={`flex items-center space-x-2 pb-3 px-3 text-xs sm:text-sm font-semibold transition border-b-2 whitespace-nowrap focus:outline-none focus:ring-1 focus:ring-cyan-500 ${
               activeTab === 'compare'
                 ? 'border-cyan-500 text-cyan-400'
                 : 'border-transparent text-slate-400 hover:text-slate-200'
             }`}
           >
-            <GitCompare className="h-4 w-4" />
+            <GitCompare className="h-4 w-4" aria-hidden="true" />
             <span>3. Longitudinal Comparison</span>
             {comparisonResult && (
               <span className="rounded-full bg-purple-950 text-purple-400 border border-purple-800 px-1.5 py-0.2 text-[10px]">
@@ -403,21 +421,25 @@ export default function CivicBriefingStudio() {
           </button>
 
           <button
+            role="tab"
+            id="tab-dual-output"
+            aria-selected={activeTab === 'dual_output'}
+            aria-controls="panel-dual-output"
             onClick={() => setActiveTab('dual_output')}
-            className={`flex items-center space-x-2 pb-3 px-3 text-xs sm:text-sm font-semibold transition border-b-2 whitespace-nowrap ${
+            className={`flex items-center space-x-2 pb-3 px-3 text-xs sm:text-sm font-semibold transition border-b-2 whitespace-nowrap focus:outline-none focus:ring-1 focus:ring-cyan-500 ${
               activeTab === 'dual_output'
                 ? 'border-cyan-500 text-cyan-400'
                 : 'border-transparent text-slate-400 hover:text-slate-200'
             }`}
           >
-            <Layers className="h-4 w-4" />
+            <Layers className="h-4 w-4" aria-hidden="true" />
             <span>4. Dual Output Studio</span>
           </button>
         </div>
 
         {/* Tab 1: Ingestion & Data Audit */}
         {activeTab === 'ingestion' && (
-          <div className="space-y-6">
+          <section id="panel-ingestion" role="tabpanel" aria-labelledby="tab-ingestion" className="space-y-6">
             <DataUploader
               rawData={rawData}
               setRawData={setRawData}
@@ -432,12 +454,12 @@ export default function CivicBriefingStudio() {
                 normalizedReadings={analysis.normalizedReadings}
               />
             )}
-          </div>
+          </section>
         )}
 
         {/* Tab 2: Role-Based Action Intelligence Engine */}
         {activeTab === 'briefs' && (
-          <div className="space-y-6">
+          <section id="panel-briefs" role="tabpanel" aria-labelledby="tab-briefs" className="space-y-6">
             <PersonaSelector
               selectedPersona={selectedPersona}
               onSelectPersona={(persona) => {
@@ -452,46 +474,54 @@ export default function CivicBriefingStudio() {
             />
 
             <ActionCardsGrid actions={actionCards} onOpenTrace={handleOpenTrace} />
-          </div>
+          </section>
         )}
 
         {/* Tab 3: Longitudinal Comparison */}
         {activeTab === 'compare' && (
-          <ComparisonStudio
-            currentAnalysis={analysis}
-            comparisonResult={comparisonResult}
-            onRunComparison={handleRunComparison}
-            onSaveCurrentAsSnapshot={handleSaveCurrentAsSnapshot}
-            isLoading={isComparing}
-            savedSnapshots={savedSnapshots}
-          />
+          <section id="panel-compare" role="tabpanel" aria-labelledby="tab-compare" className="space-y-6">
+            <ComparisonStudio
+              currentAnalysis={analysis}
+              comparisonResult={comparisonResult}
+              onRunComparison={handleRunComparison}
+              onSaveCurrentAsSnapshot={handleSaveCurrentAsSnapshot}
+              isLoading={isComparing}
+              savedSnapshots={savedSnapshots}
+            />
+          </section>
         )}
 
         {/* Tab 4: Dual Output Studio */}
         {activeTab === 'dual_output' && (
-          <div className="space-y-6">
-            <div className="flex space-x-2 border-b border-slate-800 pb-2 no-print">
+          <section id="panel-dual-output" role="tabpanel" aria-labelledby="tab-dual-output" className="space-y-6">
+            <div className="flex space-x-2 border-b border-slate-800 pb-2 no-print" role="tablist" aria-label="Dual Output View Selection">
               <button
+                role="tab"
+                aria-selected={dualOutputSubTab === 'internal'}
+                aria-label="View Internal Technical Briefing Note for Municipal Committee"
                 onClick={() => setDualOutputSubTab('internal')}
-                className={`flex items-center space-x-1.5 rounded-xl px-4 py-2 text-xs font-semibold transition ${
+                className={`flex items-center space-x-1.5 rounded-xl px-4 py-2 text-xs font-semibold transition focus:outline-none focus:ring-1 focus:ring-cyan-500 ${
                   dualOutputSubTab === 'internal'
                     ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40'
                     : 'bg-slate-900 text-slate-400 hover:text-white'
                 }`}
               >
-                <FileSpreadsheet className="h-4 w-4" />
+                <FileSpreadsheet className="h-4 w-4" aria-hidden="true" />
                 <span>Internal Technical Briefing Note (Municipal)</span>
               </button>
 
               <button
+                role="tab"
+                aria-selected={dualOutputSubTab === 'citizen'}
+                aria-label="View Multilingual Citizen Health Advisory Card"
                 onClick={() => setDualOutputSubTab('citizen')}
-                className={`flex items-center space-x-1.5 rounded-xl px-4 py-2 text-xs font-semibold transition ${
+                className={`flex items-center space-x-1.5 rounded-xl px-4 py-2 text-xs font-semibold transition focus:outline-none focus:ring-1 focus:ring-emerald-500 ${
                   dualOutputSubTab === 'citizen'
                     ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
                     : 'bg-slate-900 text-slate-400 hover:text-white'
                 }`}
               >
-                <HeartHandshake className="h-4 w-4" />
+                <HeartHandshake className="h-4 w-4" aria-hidden="true" />
                 <span>Citizen Health Advisory Card (Multilingual)</span>
               </button>
             </div>
@@ -506,7 +536,7 @@ export default function CivicBriefingStudio() {
                 hasAnalysis={!!analysis}
               />
             )}
-          </div>
+          </section>
         )}
       </main>
 
@@ -528,7 +558,7 @@ export default function CivicBriefingStudio() {
       />
 
       {/* Footer */}
-      <footer className="border-t border-slate-800 bg-slate-950/80 py-4 text-center text-xs text-slate-500 no-print">
+      <footer role="contentinfo" className="border-t border-slate-800 bg-slate-950/80 py-4 text-center text-xs text-slate-500 no-print">
         <div className="mx-auto max-w-7xl px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
           <span>Civic Air Quality Briefing Studio • Hackathon Production Edition</span>
           <span>Powered by Google Gemini 2.5 Flash SDK (`@google/genai`)</span>

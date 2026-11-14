@@ -67,7 +67,7 @@ export interface DataIntegrityAudit {
   sensorCoverage: SensorStatus[];
 }
 
-export type PersonaType = 'principal' | 'rwa' | 'municipal';
+export type PersonaType = 'principal' | 'rwa' | 'municipal' | 'gig_dispatch';
 
 export interface PersonaConfig {
   id: PersonaType;
@@ -92,13 +92,19 @@ export interface ActionCard {
   persona: PersonaType;
   title: string;
   priority: 'CRITICAL_NOW' | 'HIGH_ALERT' | 'MEDIUM_ADVISORY' | 'ROUTINE_MONITORING';
-  targetDomain: string; // e.g. "Physical Education & Recess", "DG Set Control", "Anti-Smog Guns"
+  targetDomain: string; // e.g. "Physical Education & Recess", "DG Set Control", "Anti-Smog Guns", "Gig Fleet Rerouting"
   actionHeadline: string;
   detailedProtocol: string[];
   operationalWindow: string; // e.g. "Next 2 hours", "Immediate (0-30 mins)"
   resourceRequirements: string[];
   expectedImpact: string;
   traceEvidence: TraceEvidence;
+  gigWorkerContext?: {
+    shiftExposureCapHours: number;
+    recommendedRestIntervalMinutes: number;
+    safeCorridorGuidance: string;
+    protectiveEquipmentMandate: string;
+  };
 }
 
 export interface BriefingAnalysis {

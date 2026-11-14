@@ -11,9 +11,6 @@ import {
   BookmarkPlus,
   ArrowRight,
   MapPin,
-  Clock,
-  Layers,
-  ShieldCheck,
   CheckCircle,
 } from 'lucide-react';
 import {
@@ -60,21 +57,21 @@ export function ComparisonStudio({
       case 'worsening':
         return (
           <span className="inline-flex items-center space-x-1 rounded-full bg-rose-950 px-2.5 py-0.5 text-xs font-bold text-rose-300 border border-rose-800">
-            <TrendingUp className="h-3.5 w-3.5" />
+            <TrendingUp className="h-3.5 w-3.5" aria-hidden="true" />
             <span>Worsening Trajectory</span>
           </span>
         );
       case 'improving':
         return (
           <span className="inline-flex items-center space-x-1 rounded-full bg-emerald-950 px-2.5 py-0.5 text-xs font-bold text-emerald-300 border border-emerald-800">
-            <TrendingDown className="h-3.5 w-3.5" />
+            <TrendingDown className="h-3.5 w-3.5" aria-hidden="true" />
             <span>Improving Trajectory</span>
           </span>
         );
       default:
         return (
           <span className="inline-flex items-center space-x-1 rounded-full bg-slate-800 px-2.5 py-0.5 text-xs font-bold text-slate-300 border border-slate-700">
-            <Minus className="h-3.5 w-3.5" />
+            <Minus className="h-3.5 w-3.5" aria-hidden="true" />
             <span>Stable Baseline</span>
           </span>
         );
@@ -88,7 +85,7 @@ export function ComparisonStudio({
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-b border-slate-800 pb-4">
           <div>
             <div className="flex items-center space-x-2">
-              <GitCompare className="h-5 w-5 text-cyan-400" />
+              <GitCompare className="h-5 w-5 text-cyan-400" aria-hidden="true" />
               <h3 className="text-base font-bold text-white">Longitudinal Snapshot Comparison</h3>
               <span className="rounded-md bg-cyan-950 px-2 py-0.5 text-xs font-semibold text-cyan-400 border border-cyan-800">
                 Delta Intelligence Engine
@@ -102,16 +99,17 @@ export function ComparisonStudio({
           <button
             onClick={() => selectedSnapshot && onRunComparison(selectedSnapshot)}
             disabled={isLoading || !currentAnalysis || !selectedSnapshot}
-            className="flex items-center justify-center space-x-2 rounded-xl bg-gradient-to-r from-cyan-600 to-emerald-600 px-5 py-2.5 text-xs font-bold text-white shadow-lg shadow-cyan-600/30 transition hover:from-cyan-500 hover:to-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
+            aria-label="Compute environmental deltas and compare cycles with Gemini"
+            className="flex items-center justify-center space-x-2 rounded-xl bg-gradient-to-r from-cyan-600 to-emerald-600 px-5 py-2.5 text-xs font-bold text-white shadow-lg shadow-cyan-600/30 transition hover:from-cyan-500 hover:to-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed shrink-0 focus:outline-none focus:ring-2 focus:ring-cyan-500"
           >
             {isLoading ? (
               <>
-                <RefreshCw className="h-4 w-4 animate-spin" />
+                <RefreshCw className="h-4 w-4 animate-spin" aria-hidden="true" />
                 <span>Computing Environmental Deltas...</span>
               </>
             ) : (
               <>
-                <Sparkles className="h-4 w-4" />
+                <Sparkles className="h-4 w-4" aria-hidden="true" />
                 <span>Compare Cycles with Gemini</span>
               </>
             )}
@@ -121,13 +119,15 @@ export function ComparisonStudio({
         {/* Snapshot Selection Row */}
         <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="text-xs font-semibold uppercase tracking-wider text-slate-400 block mb-1.5">
+            <label htmlFor="snapshot-select" className="text-xs font-semibold uppercase tracking-wider text-slate-400 block mb-1.5">
               Select Historical Snapshot for Baseline:
             </label>
             <select
+              id="snapshot-select"
+              aria-label="Select historical snapshot baseline"
               value={selectedSnapshotId}
               onChange={(e) => setSelectedSnapshotId(e.target.value)}
-              className="w-full rounded-xl border border-slate-700 bg-slate-950 px-3.5 py-2.5 text-xs text-white focus:border-cyan-500 focus:outline-none"
+              className="w-full rounded-xl border border-slate-700 bg-slate-950 px-3.5 py-2.5 text-xs text-white focus:border-cyan-500 focus:outline-none focus:ring-2 focus:ring-cyan-500"
             >
               {allSnapshots.map((snap) => (
                 <option key={snap.id} value={snap.id}>
@@ -138,31 +138,34 @@ export function ComparisonStudio({
           </div>
 
           <div>
-            <label className="text-xs font-semibold uppercase tracking-wider text-slate-400 block mb-1.5">
+            <label htmlFor="snapshot-name-input" className="text-xs font-semibold uppercase tracking-wider text-slate-400 block mb-1.5">
               Save Current Brief as New Historical Snapshot:
             </label>
             <div className="flex space-x-2">
               <input
+                id="snapshot-name-input"
                 type="text"
+                aria-label="New snapshot name"
                 placeholder="e.g. Cycle T-0 Post-Sweeping Sweep"
                 value={snapshotNameInput}
                 onChange={(e) => setSnapshotNameInput(e.target.value)}
                 disabled={!currentAnalysis}
-                className="flex-1 rounded-xl border border-slate-700 bg-slate-950 px-3 py-2 text-xs text-white placeholder-slate-500 focus:border-cyan-500 focus:outline-none disabled:opacity-50"
+                className="flex-1 rounded-xl border border-slate-700 bg-slate-950 px-3 py-2 text-xs text-white placeholder-slate-500 focus:border-cyan-500 focus:outline-none focus:ring-2 focus:ring-cyan-500 disabled:opacity-50"
               />
               <button
                 type="button"
                 onClick={handleSave}
                 disabled={!snapshotNameInput.trim() || !currentAnalysis}
-                className="flex items-center space-x-1 rounded-xl border border-slate-700 bg-slate-800 px-3.5 py-2 text-xs font-semibold text-slate-200 hover:bg-slate-700 hover:text-white disabled:opacity-50"
+                aria-label="Save current analysis as a baseline snapshot"
+                className="flex items-center space-x-1 rounded-xl border border-slate-700 bg-slate-800 px-3.5 py-2 text-xs font-semibold text-slate-200 hover:bg-slate-700 hover:text-white disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-cyan-500"
               >
-                <BookmarkPlus className="h-4 w-4 text-cyan-400" />
+                <BookmarkPlus className="h-4 w-4 text-cyan-400" aria-hidden="true" />
                 <span>Save</span>
               </button>
             </div>
             {saveSuccess && (
-              <p className="mt-1 text-xs text-emerald-400 flex items-center gap-1">
-                <CheckCircle className="h-3 w-3" /> Snapshot saved to memory!
+              <p role="status" className="mt-1 text-xs text-emerald-400 flex items-center gap-1">
+                <CheckCircle className="h-3 w-3" aria-hidden="true" /> Snapshot saved to memory!
               </p>
             )}
           </div>
@@ -353,7 +356,7 @@ export function ComparisonStudio({
           {comparisonResult.hotspotMigration && comparisonResult.hotspotMigration.length > 0 && (
             <div className="rounded-2xl border border-slate-800 bg-slate-900/90 p-5 shadow-xl">
               <div className="flex items-center space-x-2 border-b border-slate-800 pb-3">
-                <MapPin className="h-4 w-4 text-cyan-400" />
+                <MapPin className="h-4 w-4 text-cyan-400" aria-hidden="true" />
                 <h4 className="text-sm font-bold text-white">Hotspot Spatial Shift & Dispersion Analysis</h4>
               </div>
 
@@ -369,7 +372,7 @@ export function ComparisonStudio({
 
                     <div className="mt-2 flex items-center space-x-3 text-xs text-slate-400 font-mono">
                       <span>Baseline: {shift.previousAqi} AQI</span>
-                      <ArrowRight className="h-3 w-3 text-cyan-400" />
+                      <ArrowRight className="h-3 w-3 text-cyan-400" aria-hidden="true" />
                       <span className="text-white font-bold">Current: {shift.currentAqi} AQI</span>
                     </div>
 
@@ -385,7 +388,7 @@ export function ComparisonStudio({
           {/* AI Executive Comparative Narrative */}
           <div className="rounded-2xl border border-slate-800 bg-slate-900/90 p-5 shadow-xl">
             <h4 className="text-sm font-bold text-white border-b border-slate-800 pb-3 flex items-center gap-2">
-              <Sparkles className="h-4 w-4 text-cyan-400" />
+              <Sparkles className="h-4 w-4 text-cyan-400" aria-hidden="true" />
               <span>Gemini Atmospheric Trend Synthesis</span>
             </h4>
             <div className="mt-3 text-xs text-slate-300 whitespace-pre-line leading-relaxed">
@@ -401,7 +404,7 @@ export function ComparisonStudio({
                 <ul className="space-y-1.5 text-xs text-slate-300">
                   {comparisonResult.strategicAdjustments.map((adj, idx) => (
                     <li key={idx} className="flex items-start space-x-2">
-                      <CheckCircle className="h-3.5 w-3.5 text-emerald-400 shrink-0 mt-0.5" />
+                      <CheckCircle className="h-3.5 w-3.5 text-emerald-400 shrink-0 mt-0.5" aria-hidden="true" />
                       <span>{adj}</span>
                     </li>
                   ))}

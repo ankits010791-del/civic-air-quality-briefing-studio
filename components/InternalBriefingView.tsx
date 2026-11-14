@@ -9,9 +9,6 @@ import {
   Building,
   Scale,
   MapPin,
-  Clock,
-  AlertOctagon,
-  ShieldAlert,
 } from 'lucide-react';
 import { InternalBriefingNote } from '@/lib/types';
 
@@ -60,7 +57,7 @@ export function InternalBriefingView({ note }: InternalBriefingViewProps) {
       {/* Action Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 rounded-2xl border border-slate-800 bg-slate-900/90 p-4 shadow-xl no-print">
         <div className="flex items-center space-x-2">
-          <FileText className="h-5 w-5 text-cyan-400" />
+          <FileText className="h-5 w-5 text-cyan-400" aria-hidden="true" />
           <div>
             <h3 className="text-sm font-bold text-white">Internal Technical Briefing Document</h3>
             <p className="text-xs text-slate-400">
@@ -72,16 +69,22 @@ export function InternalBriefingView({ note }: InternalBriefingViewProps) {
         <div className="flex items-center space-x-2">
           <button
             onClick={handleCopy}
-            className="flex items-center space-x-1.5 rounded-xl border border-slate-700 bg-slate-800 px-3.5 py-2 text-xs font-semibold text-slate-200 transition hover:bg-slate-700 hover:text-white"
+            aria-label="Copy full technical briefing note to clipboard"
+            className="flex items-center space-x-1.5 rounded-xl border border-slate-700 bg-slate-800 px-3.5 py-2 text-xs font-semibold text-slate-200 transition hover:bg-slate-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-cyan-500"
           >
-            {copied ? <Check className="h-4 w-4 text-emerald-400" /> : <Copy className="h-4 w-4" />}
+            {copied ? (
+              <Check className="h-4 w-4 text-emerald-400" aria-hidden="true" />
+            ) : (
+              <Copy className="h-4 w-4" aria-hidden="true" />
+            )}
             <span>{copied ? 'Copied to Clipboard' : 'Copy Full Brief'}</span>
           </button>
           <button
             onClick={handlePrint}
-            className="flex items-center space-x-1.5 rounded-xl bg-cyan-600 px-3.5 py-2 text-xs font-semibold text-white transition hover:bg-cyan-500 shadow-lg shadow-cyan-600/30"
+            aria-label="Print official technical briefing document"
+            className="flex items-center space-x-1.5 rounded-xl bg-cyan-600 px-3.5 py-2 text-xs font-semibold text-white transition hover:bg-cyan-500 shadow-lg shadow-cyan-600/30 focus:outline-none focus:ring-2 focus:ring-cyan-400"
           >
-            <Printer className="h-4 w-4" />
+            <Printer className="h-4 w-4" aria-hidden="true" />
             <span>Print Official Brief</span>
           </button>
         </div>
@@ -129,7 +132,7 @@ export function InternalBriefingView({ note }: InternalBriefingViewProps) {
         {/* WHO & NAAQS Standard Compliance Table */}
         <div>
           <div className="flex items-center space-x-2 mb-2">
-            <Scale className="h-4 w-4 text-cyan-400" />
+            <Scale className="h-4 w-4 text-cyan-400" aria-hidden="true" />
             <h4 className="text-xs font-bold uppercase tracking-wider text-slate-300">
               Statutory Standard Compliance Table (Observed vs WHO & NAAQS 24-Hour Limits)
             </h4>
@@ -182,7 +185,7 @@ export function InternalBriefingView({ note }: InternalBriefingViewProps) {
         {/* Spatial Hotspots & Dispatch Directives */}
         <div>
           <div className="flex items-center space-x-2 mb-2">
-            <MapPin className="h-4 w-4 text-cyan-400" />
+            <MapPin className="h-4 w-4 text-cyan-400" aria-hidden="true" />
             <h4 className="text-xs font-bold uppercase tracking-wider text-slate-300">
               Identified Spatial Hotspots & Field Interventions
             </h4>
@@ -213,7 +216,7 @@ export function InternalBriefingView({ note }: InternalBriefingViewProps) {
         {/* Departmental Directives */}
         <div>
           <div className="flex items-center space-x-2 mb-2">
-            <Building className="h-4 w-4 text-cyan-400" />
+            <Building className="h-4 w-4 text-cyan-400" aria-hidden="true" />
             <h4 className="text-xs font-bold uppercase tracking-wider text-slate-300">
               Statutory Departmental Directives & Deadlines
             </h4>

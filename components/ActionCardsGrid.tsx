@@ -2,15 +2,15 @@
 
 import React from 'react';
 import {
-  AlertCircle,
   Clock,
   SearchCheck,
   CheckCircle2,
   Wrench,
-  ShieldCheck,
-  ArrowRight,
+  Bike,
+  ShieldAlert,
+  Navigation,
 } from 'lucide-react';
-import { ActionCard, TraceEvidence } from '@/lib/types';
+import { ActionCard } from '@/lib/types';
 
 interface ActionCardsGridProps {
   actions: ActionCard[];
@@ -99,7 +99,7 @@ export function ActionCardsGrid({ actions, onOpenTrace }: ActionCardsGridProps) 
 
                 {/* Operational Window */}
                 <div className="mt-2 flex items-center space-x-1.5 text-xs text-slate-300">
-                  <Clock className="h-3.5 w-3.5 text-cyan-400 shrink-0" />
+                  <Clock className="h-3.5 w-3.5 text-cyan-400 shrink-0" aria-hidden="true" />
                   <span className="font-semibold text-slate-400">Execution Window:</span>
                   <span className="font-mono text-cyan-300">{act.operationalWindow}</span>
                 </div>
@@ -112,18 +112,53 @@ export function ActionCardsGrid({ actions, onOpenTrace }: ActionCardsGridProps) 
                   <ul className="space-y-1 text-xs text-slate-300">
                     {act.detailedProtocol?.map((step, idx) => (
                       <li key={idx} className="flex items-start space-x-2">
-                        <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400 shrink-0 mt-0.5" />
+                        <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400 shrink-0 mt-0.5" aria-hidden="true" />
                         <span className="leading-relaxed">{step}</span>
                       </li>
                     ))}
                   </ul>
                 </div>
 
+                {/* Gig Worker Context / Proactive Adaptive Assistance */}
+                {act.gigWorkerContext && (
+                  <div className="mt-3 rounded-xl border border-purple-500/30 bg-purple-950/20 p-3 space-y-2">
+                    <div className="flex items-center space-x-2 text-xs font-bold text-purple-300">
+                      <Bike className="h-4 w-4" aria-hidden="true" />
+                      <span>Adaptive Dispatcher & Rider Safeguards</span>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2 text-[11px]">
+                      <div className="rounded-lg bg-slate-950 p-2 border border-slate-800">
+                        <span className="text-slate-400 block text-[10px]">Shift Exposure Cap:</span>
+                        <span className="font-bold text-rose-300">
+                          {act.gigWorkerContext.shiftExposureCapHours} Hours Max
+                        </span>
+                      </div>
+                      <div className="rounded-lg bg-slate-950 p-2 border border-slate-800">
+                        <span className="text-slate-400 block text-[10px]">Mandatory Rest Break:</span>
+                        <span className="font-bold text-cyan-300">
+                          {act.gigWorkerContext.recommendedRestIntervalMinutes} Mins Recovery
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="text-xs text-slate-300 flex items-start space-x-1.5">
+                      <Navigation className="h-3.5 w-3.5 text-emerald-400 shrink-0 mt-0.5" aria-hidden="true" />
+                      <span>{act.gigWorkerContext.safeCorridorGuidance}</span>
+                    </div>
+
+                    <div className="text-xs text-slate-300 flex items-start space-x-1.5">
+                      <ShieldAlert className="h-3.5 w-3.5 text-amber-400 shrink-0 mt-0.5" aria-hidden="true" />
+                      <span>{act.gigWorkerContext.protectiveEquipmentMandate}</span>
+                    </div>
+                  </div>
+                )}
+
                 {/* Resource Requirements */}
                 {act.resourceRequirements && act.resourceRequirements.length > 0 && (
                   <div className="mt-3 rounded-xl bg-slate-950 p-2.5 border border-slate-800">
                     <div className="flex items-center space-x-1.5 text-[11px] font-semibold text-slate-400 uppercase tracking-wide">
-                      <Wrench className="h-3 w-3 text-cyan-400" />
+                      <Wrench className="h-3 w-3 text-cyan-400" aria-hidden="true" />
                       <span>Required Equipment & Resources:</span>
                     </div>
                     <div className="mt-1 flex flex-wrap gap-1.5">
@@ -147,14 +182,15 @@ export function ActionCardsGrid({ actions, onOpenTrace }: ActionCardsGridProps) 
                   <span className="text-emerald-400">{act.expectedImpact}</span>
                 </div>
 
-                {/* TRACE SOURCE BUTTON (High Impact requirement) */}
+                {/* TRACE SOURCE BUTTON with accessible label */}
                 <button
                   type="button"
                   onClick={() => onOpenTrace(act)}
-                  className="flex items-center justify-center space-x-1.5 rounded-xl border border-cyan-500/40 bg-cyan-950/60 px-3 py-1.5 text-xs font-bold text-cyan-300 transition hover:bg-cyan-900/80 hover:text-cyan-100 hover:border-cyan-400 shadow-sm shrink-0"
+                  aria-label={`Trace source data and telemetry for action: ${act.actionHeadline}`}
+                  className="flex items-center justify-center space-x-1.5 rounded-xl border border-cyan-500/40 bg-cyan-950/60 px-3 py-1.5 text-xs font-bold text-cyan-300 transition hover:bg-cyan-900/80 hover:text-cyan-100 hover:border-cyan-400 shadow-sm shrink-0 focus:outline-none focus:ring-2 focus:ring-cyan-500"
                   title="Click to view exact source rows, raw telemetry snippets, and scientific rationale"
                 >
-                  <SearchCheck className="h-3.5 w-3.5 text-cyan-400" />
+                  <SearchCheck className="h-3.5 w-3.5 text-cyan-400" aria-hidden="true" />
                   <span>Trace Source Data</span>
                   <span className="rounded bg-cyan-900 px-1.5 py-0.2 text-[10px] font-mono text-cyan-200">
                     {act.traceEvidence?.sourceRowIds?.join(', ') || 'ROW-SRC'}

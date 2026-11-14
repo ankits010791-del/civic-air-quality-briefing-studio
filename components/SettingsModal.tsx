@@ -62,25 +62,33 @@ export function SettingsModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4 backdrop-blur-sm animate-in fade-in duration-200">
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="settings-dialog-title"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4 backdrop-blur-sm animate-in fade-in duration-200"
+    >
       <div className="w-full max-w-lg rounded-2xl border border-slate-800 bg-slate-900 p-6 shadow-2xl">
         <div className="flex items-center justify-between border-b border-slate-800 pb-4">
           <div className="flex items-center space-x-2">
-            <Key className="h-5 w-5 text-cyan-400" />
-            <h3 className="text-lg font-semibold text-white">Studio API & Deployment Settings</h3>
+            <Key className="h-5 w-5 text-cyan-400" aria-hidden="true" />
+            <h3 id="settings-dialog-title" className="text-lg font-semibold text-white">
+              Studio API & Deployment Settings
+            </h3>
           </div>
           <button
             onClick={onClose}
-            className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-800 hover:text-white"
+            aria-label="Close settings dialog"
+            className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-800 hover:text-white focus:outline-none focus:ring-2 focus:ring-cyan-500"
           >
-            <X className="h-5 w-5" />
+            <X className="h-5 w-5" aria-hidden="true" />
           </button>
         </div>
 
         <div className="mt-4 space-y-4">
           <div className="rounded-xl bg-slate-950 p-4 border border-slate-800/80">
             <div className="flex items-start space-x-3">
-              <ShieldCheck className="h-5 w-5 text-emerald-400 mt-0.5 shrink-0" />
+              <ShieldCheck className="h-5 w-5 text-emerald-400 mt-0.5 shrink-0" aria-hidden="true" />
               <div className="text-xs text-slate-300 space-y-1">
                 <p className="font-semibold text-white">Vercel & Server Environment Support</p>
                 <p className="text-slate-400">
@@ -94,16 +102,18 @@ export function SettingsModal({
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-slate-300 mb-1">
+            <label htmlFor="gemini-key-input" className="block text-xs font-medium text-slate-300 mb-1">
               Google Gemini API Key
             </label>
             <div className="relative">
               <input
+                id="gemini-key-input"
                 type="password"
                 value={inputKey}
                 onChange={(e) => setInputKey(e.target.value)}
+                aria-label="Google Gemini API Key input field"
                 placeholder="AIzaSy... (leave blank to rely on server process.env.GEMINI_API_KEY)"
-                className="w-full rounded-xl border border-slate-700 bg-slate-950 px-3.5 py-2.5 text-sm text-white placeholder-slate-500 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
+                className="w-full rounded-xl border border-slate-700 bg-slate-950 px-3.5 py-2.5 text-sm text-white placeholder-slate-500 focus:border-cyan-500 focus:outline-none focus:ring-2 focus:ring-cyan-500"
               />
             </div>
             <p className="mt-1.5 text-xs text-slate-400 flex items-center justify-between">
@@ -112,15 +122,17 @@ export function SettingsModal({
                 href="https://aistudio.google.com/app/apikey"
                 target="_blank"
                 rel="noreferrer"
-                className="text-cyan-400 hover:underline flex items-center gap-1"
+                className="text-cyan-400 hover:underline flex items-center gap-1 focus:outline-none focus:ring-1 focus:ring-cyan-500 rounded"
               >
-                Get API Key <ExternalLink className="h-3 w-3" />
+                Get API Key <ExternalLink className="h-3 w-3" aria-hidden="true" />
               </a>
             </p>
           </div>
 
           {statusMessage && (
             <div
+              role="status"
+              aria-live="polite"
               className={`flex items-start space-x-2 rounded-xl p-3 text-xs ${
                 testingStatus === 'success'
                   ? 'bg-emerald-950/60 border border-emerald-800 text-emerald-300'
@@ -130,11 +142,11 @@ export function SettingsModal({
               }`}
             >
               {testingStatus === 'success' ? (
-                <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-400 mt-0.5" />
+                <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-400 mt-0.5" aria-hidden="true" />
               ) : testingStatus === 'error' ? (
-                <AlertCircle className="h-4 w-4 shrink-0 text-rose-400 mt-0.5" />
+                <AlertCircle className="h-4 w-4 shrink-0 text-rose-400 mt-0.5" aria-hidden="true" />
               ) : (
-                <RefreshCw className="h-4 w-4 shrink-0 text-cyan-400 animate-spin mt-0.5" />
+                <RefreshCw className="h-4 w-4 shrink-0 text-cyan-400 animate-spin mt-0.5" aria-hidden="true" />
               )}
               <span className="leading-relaxed">{statusMessage}</span>
             </div>
@@ -144,12 +156,13 @@ export function SettingsModal({
             <button
               onClick={handleTestConnection}
               disabled={testingStatus === 'testing'}
-              className="flex items-center space-x-2 rounded-xl border border-slate-700 bg-slate-800 px-4 py-2 text-xs font-semibold text-slate-200 transition hover:bg-slate-700 hover:text-white disabled:opacity-50"
+              aria-label="Test Gemini Connection and Ping Endpoint"
+              className="flex items-center space-x-2 rounded-xl border border-slate-700 bg-slate-800 px-4 py-2 text-xs font-semibold text-slate-200 transition hover:bg-slate-700 hover:text-white disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-cyan-500"
             >
               {testingStatus === 'testing' ? (
-                <RefreshCw className="h-3.5 w-3.5 animate-spin text-cyan-400" />
+                <RefreshCw className="h-3.5 w-3.5 animate-spin text-cyan-400" aria-hidden="true" />
               ) : (
-                <CheckCircle2 className="h-3.5 w-3.5 text-cyan-400" />
+                <CheckCircle2 className="h-3.5 w-3.5 text-cyan-400" aria-hidden="true" />
               )}
               <span>Test Gemini Ping</span>
             </button>
@@ -157,13 +170,15 @@ export function SettingsModal({
             <div className="flex space-x-2">
               <button
                 onClick={onClose}
-                className="rounded-xl border border-slate-700 px-4 py-2 text-xs font-medium text-slate-300 hover:bg-slate-800 hover:text-white"
+                aria-label="Cancel and close settings"
+                className="rounded-xl border border-slate-700 px-4 py-2 text-xs font-medium text-slate-300 hover:bg-slate-800 hover:text-white focus:outline-none focus:ring-2 focus:ring-slate-500"
               >
                 Close
               </button>
               <button
                 onClick={handleSave}
-                className="rounded-xl bg-cyan-600 px-4 py-2 text-xs font-semibold text-white shadow-lg shadow-cyan-600/30 hover:bg-cyan-500"
+                aria-label="Save API key settings"
+                className="rounded-xl bg-cyan-600 px-4 py-2 text-xs font-semibold text-white shadow-lg shadow-cyan-600/30 hover:bg-cyan-500 focus:outline-none focus:ring-2 focus:ring-cyan-400"
               >
                 Save Settings
               </button>

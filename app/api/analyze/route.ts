@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { callGemini, extractCleanJson, getGeminiApiKey } from '@/lib/gemini';
+import { sanitizeRawInput } from '@/lib/sanitizer';
 import { BriefingAnalysis } from '@/lib/types';
 
 export const runtime = 'nodejs';
@@ -16,6 +17,12 @@ export async function POST(req: NextRequest) {
         { status: 400 }
       );
     }
+
+    // 1. Rigorous Security & Context Limit Sanitization
+    const sanitization = sanitizeRawInput(rawData, {
+      maxBytes: 25000,
+      maxLines: 150,
+    });
 
     const apiKey = getGeminiApiKey(customApiKey || req.headers.get('x-gemini-api-key'));
     if (!apiKey) {
@@ -120,24 +127,45 @@ Output MUST be strictly valid JSON matching this schema without any markdown for
   ]
 }`;
 
-    const prompt = `Analyze and normalize the following messy atmospheric monitoring raw dataset. Parse every row, identify every corrupt record or unit discrepancy, and provide full traceability links back to the source data rows:
+    const prompt = `Analyze and normalize the following pre-sanitized atmospheric monitoring raw dataset. Parse every row, identify every corrupt record or unit discrepancy, and provide full traceability links back to the source data rows:
 
 \`\`\`
-${rawData.slice(0, 15000)}
+${sanitization.sanitizedData}
 \`\`\`
 
 Return ONLY the raw JSON object.`;
 
     const rawResponse = await callGemini(prompt, apiKey, {
       systemInstruction,
-      temperature: 0.2, // low temperature for precise factual extraction
+      temperature: 0.2,
     });
 
     const parsedData = extractCleanJson<BriefingAnalysis>(rawResponse);
 
+    // Merge any security sanitization alerts into the Data Integrity Audit
+    if (sanitization.threatsNeutralized.length > 0) {
+      sanitization.threatsNeutralized.forEach((threat, i) => {
+        parsedData.dataIntegrityAudit.anomalies.unshift({
+          id: `sec-threat-${i + 1}`,
+          rowId: 'PAYLOAD-SCAN',
+          sensorId: 'INGESTION-FIREWALL',
+          issueType: 'CORRUPT_FORMAT',
+          description: `Security Sanitization Alert: ${threat}`,
+          rawSnippet: 'Incoming stream inspection',
+          actionTaken: 'Input sanitized and filtered before model evaluation',
+          severity: 'medium',
+        });
+      });
+    }
+
     return NextResponse.json({
       success: true,
       analysis: parsedData,
+      sanitizationReport: {
+        detectedFormat: sanitization.detectedFormat,
+        byteSize: sanitization.byteSize,
+        threatsNeutralizedCount: sanitization.threatsNeutralized.length,
+      },
     });
   } catch (error: any) {
     console.error('Error in /api/analyze:', error);

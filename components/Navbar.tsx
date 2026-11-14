@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Wind, ShieldAlert, Cpu, Settings, Activity, FileSpreadsheet } from 'lucide-react';
+import { Wind, Cpu, Settings } from 'lucide-react';
 
 interface NavbarProps {
   onOpenSettings: () => void;
@@ -11,10 +11,13 @@ interface NavbarProps {
 
 export function Navbar({ onOpenSettings, isAnalyzing, hasData }: NavbarProps) {
   return (
-    <header className="sticky top-0 z-40 border-b border-slate-800 bg-slate-950/80 backdrop-blur-md">
+    <header role="banner" className="sticky top-0 z-40 border-b border-slate-800 bg-slate-950/80 backdrop-blur-md">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6">
         <div className="flex items-center space-x-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-tr from-cyan-600 to-emerald-500 shadow-lg shadow-cyan-500/20">
+          <div
+            className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-tr from-cyan-600 to-emerald-500 shadow-lg shadow-cyan-500/20"
+            aria-hidden="true"
+          >
             <Wind className="h-6 w-6 text-white" />
           </div>
           <div>
@@ -34,13 +37,17 @@ export function Navbar({ onOpenSettings, isAnalyzing, hasData }: NavbarProps) {
 
         <div className="flex items-center space-x-3">
           <div className="hidden md:flex items-center space-x-2 rounded-lg bg-slate-900 border border-slate-800 px-3 py-1.5 text-xs text-slate-300">
-            <Cpu className="h-3.5 w-3.5 text-cyan-400" />
+            <Cpu className="h-3.5 w-3.5 text-cyan-400" aria-hidden="true" />
             <span>Model:</span>
             <span className="font-semibold text-emerald-400">gemini-2.5-flash</span>
           </div>
 
-          <div className="flex items-center space-x-2 rounded-lg bg-slate-900 border border-slate-800 px-3 py-1.5 text-xs">
-            <span className="relative flex h-2 w-2">
+          <div
+            role="status"
+            aria-live="polite"
+            className="flex items-center space-x-2 rounded-lg bg-slate-900 border border-slate-800 px-3 py-1.5 text-xs"
+          >
+            <span className="relative flex h-2 w-2" aria-hidden="true">
               <span
                 className={`absolute inline-flex h-full w-full rounded-full opacity-75 ${
                   isAnalyzing
@@ -67,10 +74,10 @@ export function Navbar({ onOpenSettings, isAnalyzing, hasData }: NavbarProps) {
 
           <button
             onClick={onOpenSettings}
-            className="flex items-center space-x-1.5 rounded-lg border border-slate-700 bg-slate-800/80 px-3 py-1.5 text-xs font-medium text-slate-200 transition hover:bg-slate-700 hover:text-white"
-            title="Configure Gemini API Key & Diagnostics"
+            aria-label="Open Studio API and deployment settings"
+            className="flex items-center space-x-1.5 rounded-lg border border-slate-700 bg-slate-800/80 px-3 py-1.5 text-xs font-medium text-slate-200 transition hover:bg-slate-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-cyan-500"
           >
-            <Settings className="h-4 w-4 text-cyan-400" />
+            <Settings className="h-4 w-4 text-cyan-400" aria-hidden="true" />
             <span className="hidden sm:inline">Settings</span>
           </button>
         </div>

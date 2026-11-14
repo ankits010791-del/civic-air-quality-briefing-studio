@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { School, Building2, Landmark, Check, Sparkles, RefreshCw } from 'lucide-react';
+import { School, Building2, Landmark, Check, Sparkles, RefreshCw, Bike } from 'lucide-react';
 import { PersonaType } from '@/lib/types';
 
 interface PersonaSelectorProps {
@@ -68,6 +68,22 @@ export function PersonaSelector({
         'Heavy diesel truck diversion routes',
       ],
     },
+    {
+      id: 'gig_dispatch' as PersonaType,
+      title: 'Gig Worker & Delivery Fleet Dispatcher',
+      icon: Bike,
+      badge: 'Labor Welfare & Mobility',
+      color: 'from-purple-500/20 to-indigo-500/10 border-purple-500/30 text-purple-300',
+      activeColor: 'border-purple-400 bg-purple-500/15 ring-2 ring-purple-500/20',
+      description:
+        'Manages cumulative particulate exposure budgets for delivery riders, dynamic delivery route diversions avoiding severe smog corridors, and compulsory clean-air rest pauses.',
+      keyLevers: [
+        'Shift exposure duration caps (max 3h)',
+        'Reroute riders away from smog canyons',
+        'Mandatory N95 mask replenishment hubs',
+        'Algorithmic dispatch slowdown during spikes',
+      ],
+    },
   ];
 
   return (
@@ -75,7 +91,7 @@ export function PersonaSelector({
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b border-slate-800 pb-4 gap-3">
         <div>
           <div className="flex items-center space-x-2">
-            <span className="flex h-2 w-2 rounded-full bg-cyan-400" />
+            <span className="flex h-2 w-2 rounded-full bg-cyan-400" aria-hidden="true" />
             <h3 className="text-base font-bold text-white">Role-Based Action Intelligence Engine</h3>
           </div>
           <p className="text-xs text-slate-400 mt-1">
@@ -86,23 +102,24 @@ export function PersonaSelector({
         <button
           onClick={onGenerateBrief}
           disabled={isLoading || !hasAnalysis}
-          className="flex items-center justify-center space-x-2 rounded-xl bg-gradient-to-r from-cyan-600 to-emerald-600 px-5 py-2.5 text-xs font-bold text-white shadow-lg shadow-cyan-600/30 transition hover:from-cyan-500 hover:to-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
+          aria-label="Generate tailored persona action plan using Gemini"
+          className="flex items-center justify-center space-x-2 rounded-xl bg-gradient-to-r from-cyan-600 to-emerald-600 px-5 py-2.5 text-xs font-bold text-white shadow-lg shadow-cyan-600/30 transition hover:from-cyan-500 hover:to-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed shrink-0 focus:outline-none focus:ring-2 focus:ring-cyan-500"
         >
           {isLoading ? (
             <>
-              <RefreshCw className="h-4 w-4 animate-spin" />
+              <RefreshCw className="h-4 w-4 animate-spin" aria-hidden="true" />
               <span>Generating Tailored Interventions...</span>
             </>
           ) : (
             <>
-              <Sparkles className="h-4 w-4" />
+              <Sparkles className="h-4 w-4" aria-hidden="true" />
               <span>Generate Persona Action Plan</span>
             </>
           )}
         </button>
       </div>
 
-      <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4" role="radiogroup" aria-label="Select Persona Role">
         {personas.map((p) => {
           const Icon = p.icon;
           const isSelected = selectedPersona === p.id;
@@ -110,8 +127,18 @@ export function PersonaSelector({
           return (
             <div
               key={p.id}
+              role="radio"
+              aria-checked={isSelected}
+              tabIndex={0}
+              aria-label={`Select ${p.title} persona context`}
               onClick={() => onSelectPersona(p.id)}
-              className={`cursor-pointer rounded-2xl border p-4 transition-all duration-150 flex flex-col justify-between ${
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  onSelectPersona(p.id);
+                }
+              }}
+              className={`cursor-pointer rounded-2xl border p-4 transition-all duration-150 flex flex-col justify-between focus:outline-none focus:ring-2 focus:ring-cyan-500 ${
                 isSelected
                   ? `${p.activeColor} shadow-lg shadow-cyan-950/40`
                   : 'border-slate-800 bg-slate-950/70 hover:border-slate-700 hover:bg-slate-950'
@@ -123,6 +150,7 @@ export function PersonaSelector({
                     className={`flex h-9 w-9 items-center justify-center rounded-xl bg-slate-900 border ${
                       isSelected ? 'border-cyan-400/50 text-cyan-300' : 'border-slate-800 text-slate-400'
                     }`}
+                    aria-hidden="true"
                   >
                     <Icon className="h-5 w-5" />
                   </div>
@@ -146,7 +174,7 @@ export function PersonaSelector({
                 <ul className="space-y-1 text-[11px] text-slate-400">
                   {p.keyLevers.map((lever, idx) => (
                     <li key={idx} className="flex items-center space-x-1.5">
-                      <Check className="h-3 w-3 text-cyan-400 shrink-0" />
+                      <Check className="h-3 w-3 text-cyan-400 shrink-0" aria-hidden="true" />
                       <span className="truncate">{lever}</span>
                     </li>
                   ))}

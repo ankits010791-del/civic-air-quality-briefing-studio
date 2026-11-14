@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { X, SearchCheck, FileText, CheckCircle, Database, AlertTriangle, ArrowRight } from 'lucide-react';
+import { X, SearchCheck, FileText, Database, AlertTriangle } from 'lucide-react';
 import { TraceEvidence } from '@/lib/types';
 
 interface TraceabilityModalProps {
@@ -22,11 +22,19 @@ export function TraceabilityModal({
   if (!isOpen || !traceEvidence) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm animate-in fade-in duration-200">
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="trace-modal-title"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm animate-in fade-in duration-200"
+    >
       <div className="w-full max-w-2xl rounded-2xl border border-cyan-500/30 bg-slate-900 p-6 shadow-2xl shadow-cyan-950/50 max-h-[90vh] overflow-y-auto">
         <div className="flex items-start justify-between border-b border-slate-800 pb-4">
           <div className="flex items-center space-x-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-cyan-500/10 border border-cyan-500/30 text-cyan-400">
+            <div
+              className="flex h-10 w-10 items-center justify-center rounded-xl bg-cyan-500/10 border border-cyan-500/30 text-cyan-400"
+              aria-hidden="true"
+            >
               <SearchCheck className="h-5 w-5" />
             </div>
             <div>
@@ -38,7 +46,7 @@ export function TraceabilityModal({
                   Confidence: {Math.round((traceEvidence.confidence || 0.95) * 100)}%
                 </span>
               </div>
-              <h3 className="text-base font-bold text-white mt-1 leading-snug">
+              <h3 id="trace-modal-title" className="text-base font-bold text-white mt-1 leading-snug">
                 {title}
               </h3>
             </div>
@@ -46,9 +54,10 @@ export function TraceabilityModal({
 
           <button
             onClick={onClose}
-            className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-800 hover:text-white"
+            aria-label="Close Trace Inspector dialog"
+            className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-800 hover:text-white focus:outline-none focus:ring-2 focus:ring-cyan-500"
           >
-            <X className="h-5 w-5" />
+            <X className="h-5 w-5" aria-hidden="true" />
           </button>
         </div>
 
@@ -56,7 +65,7 @@ export function TraceabilityModal({
           {/* Linked Source Rows */}
           <div>
             <label className="text-xs font-semibold uppercase tracking-wider text-slate-400 flex items-center gap-1.5 mb-2">
-              <Database className="h-3.5 w-3.5 text-cyan-400" />
+              <Database className="h-3.5 w-3.5 text-cyan-400" aria-hidden="true" />
               Direct Data Source Grounding (Row / Sensor IDs)
             </label>
             <div className="flex flex-wrap gap-2">
@@ -88,7 +97,7 @@ export function TraceabilityModal({
           {/* Verbatim Raw Evidence Snippet */}
           <div>
             <label className="text-xs font-semibold uppercase tracking-wider text-slate-400 flex items-center gap-1.5 mb-1.5">
-              <FileText className="h-3.5 w-3.5 text-amber-400" />
+              <FileText className="h-3.5 w-3.5 text-amber-400" aria-hidden="true" />
               Verbatim Raw Data Snippet (Un-normalized Ingestion Row)
             </label>
             <div className="space-y-2">
@@ -112,7 +121,7 @@ export function TraceabilityModal({
           {/* Triggered Rule & Threshold */}
           <div className="rounded-xl bg-slate-950 p-3.5 border border-slate-800 space-y-1">
             <div className="flex items-center space-x-1.5 text-xs font-semibold text-rose-400 uppercase tracking-wider">
-              <AlertTriangle className="h-3.5 w-3.5" />
+              <AlertTriangle className="h-3.5 w-3.5" aria-hidden="true" />
               <span>Civic Standard / Safety Threshold Triggered</span>
             </div>
             <p className="text-xs text-slate-200 font-mono">
@@ -133,7 +142,8 @@ export function TraceabilityModal({
           <div className="flex justify-end pt-2 border-t border-slate-800">
             <button
               onClick={onClose}
-              className="rounded-xl bg-slate-800 px-4 py-2 text-xs font-semibold text-white hover:bg-slate-700"
+              aria-label="Close trace evidence modal"
+              className="rounded-xl bg-slate-800 px-4 py-2 text-xs font-semibold text-white hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-cyan-500"
             >
               Close Trace Inspector
             </button>

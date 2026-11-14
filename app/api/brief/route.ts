@@ -8,7 +8,11 @@ export const maxDuration = 60;
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { analysis, persona, customApiKey }: { analysis: BriefingAnalysis; persona: PersonaType; customApiKey?: string } = body;
+    const {
+      analysis,
+      persona,
+      customApiKey,
+    }: { analysis: BriefingAnalysis; persona: PersonaType; customApiKey?: string } = body;
 
     if (!analysis || !persona) {
       return NextResponse.json(
@@ -35,13 +39,15 @@ export async function POST(req: NextRequest) {
         'Housing Society / Resident Welfare Association (RWA) Manager. Responsibilities: diesel generator (DG) set running curbs, leaf/waste open burning prevention, construction dust netting and water misting, vulnerable elderly resident advisories, parking lot and basement ventilation.',
       municipal:
         'Ward / Municipal Environmental Enforcement Officer. Responsibilities: mechanized road sweeping routes, water sprinkler truck dispatch, industrial boiler/smokestack inspection mobilization, dust suppression compliance at civil work sites, commercial diesel vehicle idling enforcement.',
+      gig_dispatch:
+        'Gig Worker & Delivery Fleet Dispatcher / Outdoor Labor Coordinator. Responsibilities: app-based rider cumulative particulate exposure budgets, dynamic delivery corridor rerouting avoiding severe smog canyons, mandatory 45-minute clean-air rest pauses, N95 respirator replenishment, and algorithmic dispatch slowdowns during peak AQI spikes.',
     };
 
     const systemInstruction = `You are an elite Civic Emergency Environmental Response Architect.
-You translate normalized air quality sensor feeds into rigorous, high-impact, role-based action plans for key civic actors.
+You translate normalized air quality sensor feeds into rigorous, high-impact, role-based action plans for key civic actors and labor coordinators.
 
 Selected Persona: ${persona.toUpperCase()}
-Persona Scope: ${personaDescriptions[persona]}
+Persona Scope: ${personaDescriptions[persona] || personaDescriptions.municipal}
 
 CRITICAL REQUIREMENT: TRACEABILITY & EVIDENCE MAPPING
 Every action recommendation MUST be explicitly grounded in the specific sensor readings from the provided dataset.
@@ -49,13 +55,16 @@ You must populate the "traceEvidence" field for each action with:
 - "sourceRowIds": array of exact row IDs (e.g. ["ROW-1", "ROW-3"]) that triggered this action.
 - "observedMetric": e.g. "PM2.5 concentration reached 214.6 µg/m³ (Severe category)".
 - "rawEvidenceSnippets": direct quotation from raw readings.
-- "ruleTriggered": civic environmental safety threshold (e.g., "NAAQS 24-hr PM2.5 > 60 µg/m³; School health protocol emergency trigger at AQI > 200").
+- "ruleTriggered": civic environmental safety threshold (e.g., "NAAQS 24-hr PM2.5 > 60 µg/m³; Outdoor labor safety cap triggered at AQI > 250").
 - "rationale": exact scientific justification connecting the data to the action.
 
-Also generate the structured "internalBriefingNote" for municipal coordination and technical records, including:
-1. WHO & NAAQS standard compliance table comparison (WHO 24h limit for PM2.5 is 15 µg/m³, PM10 is 45 µg/m³, NO2 is 25 µg/m³; National standard is PM2.5: 60 µg/m³, PM10: 100 µg/m³, NO2: 80 µg/m³).
-2. Departmental directives with enforcement deadlines.
-3. Detailed technical markdown brief.
+If persona is "gig_dispatch", populate "gigWorkerContext" with:
+- "shiftExposureCapHours": recommended max continuous outdoor shift (e.g. 2, 3, or 4 hours).
+- "recommendedRestIntervalMinutes": required clean air recovery break (e.g. 30 or 45 mins).
+- "safeCorridorGuidance": arterial route recommendations avoiding hotspots.
+- "protectiveEquipmentMandate": e.g. "Fit-tested N95/FFP2 respirator with particulate seal".
+
+Also generate the structured "internalBriefingNote" for municipal coordination and technical records.
 
 Output strictly valid JSON with this exact schema:
 {
@@ -78,6 +87,12 @@ Output strictly valid JSON with this exact schema:
         "ruleTriggered": "Threshold violated",
         "confidence": 0.95,
         "rationale": "Why this data row demands this specific intervention"
+      },
+      "gigWorkerContext": {
+        "shiftExposureCapHours": 3,
+        "recommendedRestIntervalMinutes": 45,
+        "safeCorridorGuidance": "Reroute riders via Western Bypass to avoid Sector 7 & Sector 11 industrial spikes",
+        "protectiveEquipmentMandate": "Mandatory N95/FFP2 mask distribution at hub checkpoints"
       }
     }
   ],
@@ -110,7 +125,7 @@ Output strictly valid JSON with this exact schema:
     ],
     "departmentalDirectives": [
       {
-        "department": "e.g. Directorate of Education / Transport / Solid Waste",
+        "department": "e.g. Directorate of Education / Transport / Solid Waste / Labor Welfare",
         "directive": "Exact administrative order",
         "enforcementAuthority": "Officer role",
         "deadline": "e.g. 10:00 AM Today"
